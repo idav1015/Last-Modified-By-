@@ -32,3 +32,4 @@ function searchFilesByLastModifiedUserInFolder(parentFolderId, userEmail, fileNa
   Logger.log(files);
   return files;
 }
+
