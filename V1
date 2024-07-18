@@ -1,0 +1,46 @@
+function runExample() {
+  var parentFolderId = '1CLTuXJUlkxnHDKe5uo4IejLZf_FRiVoO'; // Replace with your parent folder ID
+  // var userEmail = 'idav1015@gmail.com'; // Replace with the email address you want to search for
+  var userEmail = 'alondra.rrodriguez05@gmail.com'; // Replace with the email address you want to search for
+  var fileNamePrefix = 'FM'; // Replace with the file name prefix you want to search for
+  searchFilesByLastModifiedUserInFolder(parentFolderId, userEmail, fileNamePrefix);
+}
+
+
+
+
+function searchFilesByLastModifiedUserInFolder(parentFolderId, userEmail, fileNamePrefix) {
+  var files = [];
+  var parentFolder = DriveApp.getFolderById(parentFolderId);
+
+  function searchInFolder(folder) {
+    var folderFiles = folder.getFiles();
+    while (folderFiles.hasNext()) {
+      var file = folderFiles.next();
+      var fileId = file.getId();
+      var fileDetails = Drive.Files.get(fileId, { fields: 'lastModifyingUser, modifiedTime, name' });
+      
+      var lastModifyingUser = fileDetails.lastModifyingUser;
+      if (lastModifyingUser && lastModifyingUser.emailAddress === userEmail && file.getName().indexOf(fileNamePrefix) === 0) {
+        files.push({
+          name: file.getName(),
+          id: file.getId(),
+          lastModifiedUser: lastModifyingUser.displayName,
+          lastModifiedDate: fileDetails.modifiedTime
+        });
+        Logger.log('File matched: ' + file.getName()); // Log matched file name
+      }
+    }
+
+    var subfolders = folder.getFolders();
+    while (subfolders.hasNext()) {
+      searchInFolder(subfolders.next());
+    }
+  }
+
+  searchInFolder(parentFolder);
+
+  Logger.log(files);
+  return files;
+}
+
